@@ -27,6 +27,22 @@ class Scraper
     }
 
     /**
+     * Resuelve el captcha de manera manual.
+     *
+     * @param string $captchaUrl
+     * @return string
+     */
+    private function resolveCaptcha(string $captchaUrl): string
+    {
+        $captchaImage = file_get_contents($captchaUrl);
+        $captchaPath = __DIR__ . '/captcha.png';
+        file_put_contents($captchaPath, $captchaImage);
+        echo "Por favor, resuelve el captcha guardado en: $captchaPath\n";
+        echo "Ingresa el valor del captcha: ";
+        return trim(fgets(STDIN));
+    }
+
+    /**
      * @throws InvalidCaptchaException
      * @throws InvalidCredentialsException
      */
@@ -43,9 +59,12 @@ class Scraper
             ->filter('#divCaptcha > img')
             ->first();
 
-        $image = CaptchaImage::newFromInlineHtml($captcha->attr('src'));
+        // Reemplazar la lógica de obtención del captcha con la nueva función
+        $value = $this->resolveCaptcha($captcha->attr('src'));
 
-        $value = $this->captchaResolver->resolve($image);
+        echo "RFC: " . $this->credentials->getRfc() . "\n";
+        echo "Password: " . $this->credentials->getCiec() . "\n";
+        echo "Captcha: " . $value . "\n";
 
         $form = $this->browserClient->getCrawler()
             ->selectButton('submit')
@@ -54,7 +73,7 @@ class Scraper
         $form->setValues([
             'Ecom_User_ID' => $this->credentials->getRfc(),
             'Ecom_Password' => $this->credentials->getCiec(),
-            'userCaptcha' => $value->getValue(),
+            'userCaptcha' => $value,
         ]);
 
         $this->browserClient->submit($form);
@@ -68,6 +87,7 @@ class Scraper
             throw new InvalidCredentialsException('The provided credentials are invalid');
         }
     }
+
 
     private function buildConstancia(): void
     {

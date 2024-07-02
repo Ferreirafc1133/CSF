@@ -14,6 +14,8 @@ use PhpCfdi\CsfPdfScraper\Exceptions\PDFDownloadException;
 use PhpCfdi\CsfPdfScraper\Exceptions\SatScraperException;
 use PhpCfdi\ImageCaptchaResolver\CaptchaImage;
 use PhpCfdi\ImageCaptchaResolver\CaptchaResolverInterface;
+use Symfony\Component\Panther\PantherTestCase;
+use GuzzleHttp\Cookie\CookieJar;
 
 class Scraper
 {
@@ -26,12 +28,6 @@ class Scraper
     ) {
     }
 
-    /**
-     * Resuelve el captcha de manera manual.
-     *
-     * @param string $captchaUrl
-     * @return string
-     */
     private function resolveCaptcha(string $captchaUrl): string
     {
         $captchaImage = file_get_contents($captchaUrl);
@@ -42,10 +38,6 @@ class Scraper
         return trim(fgets(STDIN));
     }
 
-    /**
-     * @throws InvalidCaptchaException
-     * @throws InvalidCredentialsException
-     */
     private function login(): void
     {
         $this->browserClient->get(URL::LOGIN_URL);
@@ -59,7 +51,6 @@ class Scraper
             ->filter('#divCaptcha > img')
             ->first();
 
-        // Reemplazar la lógica de obtención del captcha con la nueva función
         $value = $this->resolveCaptcha($captcha->attr('src'));
 
         echo "RFC: " . $this->credentials->getRfc() . "\n";
@@ -87,7 +78,6 @@ class Scraper
             throw new InvalidCredentialsException('The provided credentials are invalid');
         }
     }
-
 
     private function buildConstancia(): void
     {
@@ -119,22 +109,42 @@ class Scraper
         $this->login();
         $this->buildConstancia();
 
-        $cookieParser = new CookieParser($this->browserClient->getCookieJar());
+        // Obtener cookies desde el cliente de Panther
+        $client = $this->browserClient->getClient();
+        $cookies = $client->getCookieJar()->all();
+
+        $cookieJar = new CookieJar();
+        foreach ($cookies as $cookie) {
+            $cookieJar->setCookie(new \GuzzleHttp\Cookie\SetCookie([
+                'Name' => $cookie->getName(),
+                'Value' => $cookie->getValue(),
+                'Domain' => $cookie->getDomain(),
+                'Path' => $cookie->getPath(),
+                'Expires' => $cookie->getExpiresTime(),
+                'Secure' => $cookie->isSecure(),
+                'HttpOnly' => $cookie->isHttpOnly(),
+            ]));
+        }
 
         try {
             $response = $this->client->request('GET',
                 URL::DOWNLOAD_CONSTANCIA_URL, [
-                    'cookies' => $cookieParser->guzzleCookieJar(),
+                    'cookies' => $cookieJar,
+                    'verify' => false, // Desactiva la verificación de SSL
+                    'headers' => [
+                        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Accept' => 'application/pdf',
+                    ],
                 ]);
         } catch (\Throwable $exception) {
+            file_put_contents('error_log.txt', $exception->getMessage(), FILE_APPEND);
+            file_put_contents('error_log.txt', "\n", FILE_APPEND);
+            file_put_contents('error_log.txt', $exception->getTraceAsString(), FILE_APPEND);
+            file_put_contents('error_log.txt', "\n\n", FILE_APPEND);
             throw new PDFDownloadException('Error getting pdf, server error', 0, $exception);
         }
 
-        // TODO: quitar esta linea cuando ya no lo descargue 2 veces
         @unlink('SAT.pdf');
-
-        // TODO: hacer logout correctamente
-        // $this->logout();*/
 
         return $response->getBody()->__toString();
     }

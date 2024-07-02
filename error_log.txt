@@ -1,0 +1,15 @@
+Server error: `GET https://rfcampc.siat.sat.gob.mx/PTSC/IdcSiat/IdcGeneraConstancia.jsf` resulted in a `500 Internal Server Error` response
+#0 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\guzzle\src\Middleware.php(72): GuzzleHttp\Exception\RequestException::create(Object(GuzzleHttp\Psr7\Request), Object(GuzzleHttp\Psr7\Response), NULL, Array, NULL)
+#1 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(209): GuzzleHttp\Middleware::GuzzleHttp\{closure}(Object(GuzzleHttp\Psr7\Response))
+#2 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(158): GuzzleHttp\Promise\Promise::callHandler(1, Object(GuzzleHttp\Psr7\Response), NULL)
+#3 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\TaskQueue.php(52): GuzzleHttp\Promise\Promise::GuzzleHttp\Promise\{closure}()
+#4 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(251): GuzzleHttp\Promise\TaskQueue->run(true)
+#5 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(227): GuzzleHttp\Promise\Promise->invokeWaitFn()
+#6 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(272): GuzzleHttp\Promise\Promise->waitIfPending()
+#7 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(229): GuzzleHttp\Promise\Promise->invokeWaitList()
+#8 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\promises\src\Promise.php(69): GuzzleHttp\Promise\Promise->waitIfPending()
+#9 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\vendor\guzzlehttp\guzzle\src\Client.php(189): GuzzleHttp\Promise\Promise->wait()
+#10 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\src\Scraper.php(113): GuzzleHttp\Client->request('GET', 'https://rfcampc...', Array)
+#11 C:\Users\ferch\OneDrive - ITESO\Pabs\Facturas solas\csf-pdf-scraper\scrape.php(32): PhpCfdi\CsfPdfScraper\Scraper->download()
+#12 {main}
+
